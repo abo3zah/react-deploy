@@ -4,7 +4,7 @@ import './index.css';
 
 function Square(props) {
     return ( 
-        <button className = "square" onClick ={props.onClick} > 
+        <button className = "border border-black w-20 aspect-square text-4xl" onClick ={props.onClick} > 
             {props.value} 
         </button>
     )
@@ -49,19 +49,19 @@ class Board extends React.Component{
         }
 
         return (
-            <div>
-                <div className='status'>{status}</div>
-                <div className="board-row">
+            <div className='grid gap-1 justify-center items-center'>
+                <div className='text-center'>{status}</div>
+                <div className="grid gap-1 grid-cols-3 justify-center">
                     {this.renderSquare(0)}
                     {this.renderSquare(1)}
                     {this.renderSquare(2)}
                 </div>
-                <div className="board-row">
+                <div className="grid gap-1 grid-cols-3 justify-center">
                     {this.renderSquare(3)}
                     {this.renderSquare(4)}
                     {this.renderSquare(5)}
                 </div>
-                <div className="board-row">
+                <div className="grid gap-1 grid-cols-3 justify-center">
                     {this.renderSquare(6)}
                     {this.renderSquare(7)}
                     {this.renderSquare(8)}
@@ -74,12 +74,12 @@ class Board extends React.Component{
 class Game extends React.Component{
     render(){
         return(
-            <div className='game'>
+            <div className='p-6 grid align-middle w-full h-full'>
                 <React.StrictMode>
-                    <div className='game-board'>
+                    <div className=''>
                         <Board />
                     </div>
-                    <div className='game-info'>
+                    <div className='ml-3'>
                         <div>{/* status */}</div>
                         <ol>{/* TODO */}</ol>
                     </div>
