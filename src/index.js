@@ -141,7 +141,7 @@ class Game extends React.Component{
   }
 
     return(
-        <div className='p-6 grid grid-cols-2 align-middle w-full'>
+        <div className='p-6 grid align-middle w-full'>
             <div className=''>
                 <Board 
                   squares = {current.squares}
