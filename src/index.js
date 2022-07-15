@@ -13,110 +13,150 @@ function Square(props) {
 }
 
 class Board extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            squares: Array(9).fill(null),
-            squaresBackground: Array(9).fill("hover:bg-gray-100"),
-            xIsNext:true,
-            count:9,
-        }
-    }
 
-    handleClick(i) {
-        const squares = this.state.squares.slice();
+  renderSquare(i){
+      return <Square value={this.props.squares[i]} onClick={()=> this.props.onClick(i)} squaresBackground={this.props.squaresBackground[i]} />;
+  }
 
-        if (calculateWinner(squares) || squares[i]){
-          return;
-        }
-
-        squares[i] = this.state.xIsNext? 'X': 'O';
-        this.setState({
-            squares:squares,
-            xIsNext:!this.state.xIsNext,
-            count: this.state.count-1,
-        });
-
-        const winner = calculateWinner(squares);
-
-        if(winner){
-          const squaresBackground = this.state.squaresBackground.slice();
-          squaresBackground[winner[1]] = squaresBackground[winner[2]] = squaresBackground[winner[3]] = "bg-green-100";
-          this.setState({
-            squaresBackground:squaresBackground,
-          });
-        }
-
-    }
-
-    resetClick(){
-      this.setState({
-        squares:Array(9).fill(null),
-        squaresBackground: Array(9).fill("hover:bg-gray-100"),
-        xIsNext:true,
-        count:9,
-      });
-    }
-
-    renderSquare(i){
-        return <Square value={this.state.squares[i]} onClick={()=> this.handleClick(i)} squaresBackground={this.state.squaresBackground[i]} />;
-    }
-
-    render(){
-        const winner = calculateWinner(this.state.squares);
-
-        let status;
-
-        if (winner){
-            status = '🎊 Winner: ' + winner[0] + ' 🎊';
-        } else {
-            if (this.state.count <= 0 ){
-              status = 'Draw'
-            }else{
-              status = 'Next Player: ' + (this.state.xIsNext? 'X' : 'O');
-            }
-        }
-
-        return (
-            <div className='grid gap-1 justify-center items-center'>
-                <div className='text-center text-3xl'>{status}</div>
-                <div className="grid gap-1 grid-cols-3 justify-center">
-                    {this.renderSquare(0)}
-                    {this.renderSquare(1)}
-                    {this.renderSquare(2)}
-                </div>
-                <div className="grid gap-1 grid-cols-3 justify-center">
-                    {this.renderSquare(3)}
-                    {this.renderSquare(4)}
-                    {this.renderSquare(5)}
-                </div>
-                <div className="grid gap-1 grid-cols-3 justify-center">
-                    {this.renderSquare(6)}
-                    {this.renderSquare(7)}
-                    {this.renderSquare(8)}
-                </div>
-                <button className='border border-black h-10 font-bold bg-gray-200 hover:bg-gray-300 active:bg-gray-100' onClick={() => this.resetClick()}>Restart</button>
-            </div>
-        );
-    }
+  render(){
+    return (
+      <div className='grid gap-1 justify-center items-center'>
+          <div className="grid gap-1 grid-cols-3 justify-center">
+              {this.renderSquare(0)}
+              {this.renderSquare(1)}
+              {this.renderSquare(2)}
+          </div>
+          <div className="grid gap-1 grid-cols-3 justify-center">
+              {this.renderSquare(3)}
+              {this.renderSquare(4)}
+              {this.renderSquare(5)}
+          </div>
+          <div className="grid gap-1 grid-cols-3 justify-center">
+              {this.renderSquare(6)}
+              {this.renderSquare(7)}
+              {this.renderSquare(8)}
+          </div>
+          <button className='border border-black h-10 font-bold bg-gray-200 hover:bg-gray-300 active:bg-gray-100' onClick={() => this.props.resetCmd()}>Restart</button>
+      </div>
+    );
+  }
 }
 
 class Game extends React.Component{
-    render(){
-        return(
-            <div className='p-6 grid align-middle w-full h-full'>
-                <React.StrictMode>
-                    <div className=''>
-                        <Board />
-                    </div>
-                    <div className='ml-3'>
-                        <div>{/* status */}</div>
-                        <ol>{/* TODO */}</ol>
-                    </div>
-                </React.StrictMode>
-            </div>
-        );
+
+  constructor(props){
+    super(props);
+    this.state = {
+        history: [{
+          squares: Array(9).fill(null),
+        }],
+        squaresBackground: Array(9).fill("hover:bg-gray-100"),
+        xIsNext:true,
+        stepNumber: 0,
+        count:9,
     }
+  }
+
+  handleClick(i) {
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const current = history[history.length -1];
+    const squares = current.squares.slice();
+
+    if (calculateWinner(squares) || squares[i]){
+      return;
+    }
+
+    squares[i] = this.state.xIsNext? 'X': 'O';
+    this.setState({
+        history:history.concat([{
+          squares:squares,
+        }]),
+        stepNumber: history.length,
+        xIsNext:!this.state.xIsNext,
+        count: this.state.count-1,
+    });
+
+    this.colorSquares(calculateWinner(squares));
+  }
+
+  colorSquares(result){
+    if(result){
+      const squaresBackground = this.state.squaresBackground.slice();
+      squaresBackground[result[1]] = squaresBackground[result[2]] = squaresBackground[result[3]] = "bg-green-100";
+      this.setState({
+        squaresBackground:squaresBackground,
+      });
+
+      return squaresBackground;
+    }
+  }
+
+  jumpTo(step){
+    const history = this.state.history;
+    const current = history[step];
+
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) === 0,
+      count: 9 - step,
+      squaresBackground: calculateWinner(current.squares) ? this.colorSquares(calculateWinner(current.squares)) : Array(9).fill("hover:bg-gray-100"),
+    })
+  }
+
+  resetClick(){
+    this.setState({
+      history: [{
+        squares: Array(9).fill(null),
+      }],
+      squaresBackground: Array(9).fill("hover:bg-gray-100"),
+      xIsNext:true,
+      stepNumber: 0,
+      count:9,
+    });
+  }
+
+  render(){
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const winner = calculateWinner(current.squares);
+
+    const moves = history.map((step, move) => {
+      const desc = move ? 'Go to move#' + move: 'Go to game start';
+      
+      return(
+        <li key={move} onClick={() => this.jumpTo(move)} className='border border-black bg-slate-200 p-2 rounded cursor-pointer'>{desc}</li>
+      );
+    })
+
+    let status;
+
+    if (winner){
+      status = '🎊 Winner: ' + winner[0] + ' 🎊';
+    } else {
+      if (this.state.count <= 0 ){
+        status = 'Draw'
+      }else{
+        status = 'Next Player: ' + (this.state.xIsNext? 'X' : 'O');
+      }
+  }
+
+    return(
+        <div className='p-6 grid grid-cols-2 align-middle w-full'>
+            <div className=''>
+                <Board 
+                  squares = {current.squares}
+                  onClick = {(i) => this.handleClick(i)}
+                  squaresBackground = {this.state.squaresBackground}
+                  resetCmd = {() => this.resetClick()}
+                />
+            </div>
+            <div className='pt-6 grid justify-center content-start w-full gap-2'>
+              <div className='text-center text-3xl w-full'>{status}</div>
+              <ol className='grid justify-items-stretch w-full gap-1'>{moves}</ol>
+            </div>
+        </div>
+    );
+  }
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
