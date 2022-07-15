@@ -4,10 +4,12 @@ import './index.css';
 
 function Square(props) {
 
-    let classes = "border border-black w-20 aspect-square text-4xl " + props.squaresBackground;
+    let classes = "border border-black w-20 aspect-square text-4xl rounded " + props.squaresBackground + (props.currentSquare === props.move ? ' font-bold' : ' hover:bg-gray-400');
+
+    console.log()
     return ( 
         <button className = {classes} onClick ={props.onClick} > 
-            {props.value} 
+            {props.value}
         </button>
     )
 }
@@ -15,7 +17,7 @@ function Square(props) {
 class Board extends React.Component{
 
   renderSquare(i){
-      return <Square value={this.props.squares[i]} onClick={()=> this.props.onClick(i)} squaresBackground={this.props.squaresBackground[i]} />;
+      return <Square value={this.props.squares[i]} onClick={()=> this.props.onClick(i)} squaresBackground={this.props.squaresBackground[i]} move={this.props.move} currentSquare={i} />;
   }
 
   render(){
@@ -36,7 +38,7 @@ class Board extends React.Component{
               {this.renderSquare(7)}
               {this.renderSquare(8)}
           </div>
-          <button className='border border-black h-10 font-bold bg-gray-200 hover:bg-gray-300 active:bg-gray-100' onClick={() => this.props.resetCmd()}>Restart</button>
+          <button className='border border-black h-10 bg-sky-700 rounded hover:bg-sky-600 active:bg-sky-500 text-white' onClick={() => this.props.resetCmd()}>RESTART</button>
       </div>
     );
   }
@@ -49,8 +51,9 @@ class Game extends React.Component{
     this.state = {
         history: [{
           squares: Array(9).fill(null),
+          move: null,
         }],
-        squaresBackground: Array(9).fill("hover:bg-gray-100"),
+        squaresBackground: Array(9).fill(""),
         xIsNext:true,
         stepNumber: 0,
         count:9,
@@ -70,6 +73,7 @@ class Game extends React.Component{
     this.setState({
         history:history.concat([{
           squares:squares,
+          move: i,
         }]),
         stepNumber: history.length,
         xIsNext:!this.state.xIsNext,
@@ -107,6 +111,7 @@ class Game extends React.Component{
     this.setState({
       history: [{
         squares: Array(9).fill(null),
+        move:null
       }],
       squaresBackground: Array(9).fill("hover:bg-gray-100"),
       xIsNext:true,
@@ -133,21 +138,24 @@ class Game extends React.Component{
     }
 
     return(
-        <div className='p-6 grid justify-center align-middle w-full gap-3'>
-            <div className='text-center text-3xl w-full'>{status}</div>
-            <div className=''>
-                <Board 
-                  squares = {current.squares}
-                  onClick = {(i) => this.handleClick(i)}
-                  squaresBackground = {this.state.squaresBackground}
-                  resetCmd = {() => this.resetClick()}
-                />
-            </div>
-            <div className='flex gap-1 outline outline-1 outline-black rounded'>
-              <button className='bg-blue-500 text-white align-middle disabled:bg-gray-400 px-2 text-lg rounded' disabled={this.state.stepNumber === 0? true : false} onClick={() => this.jumpTo(this.state.stepNumber-1)}>&#8592;</button>
-              <span className='flex-grow text-center'>{this.state.stepNumber === 0? 'Waiting': this.state.stepNumber}</span>
-              <button className='bg-blue-500 text-white align-middle disabled:bg-gray-400 px-2 text-lg rounded' disabled={this.state.stepNumber === (this.state.history.length - 1) ? true : false} onClick={() => this.jumpTo(this.state.stepNumber+1)}>&#8594;</button>
-            </div>
+        <div className='w-full grid justify-center items-center h-full'>
+          <div className='p-6 grid justify-items-stretch align-middle w-80 bg-gray-50 gap-3 rounded outline outline-black'>
+              <div className='text-center text-3xl w-full bg-cyan-600 text-white rounded p-3'>{status}</div>
+              <div className=''>
+                  <Board
+                    squares = {current.squares}
+                    onClick = {(i) => this.handleClick(i)}
+                    squaresBackground = {this.state.squaresBackground}
+                    resetCmd = {() => this.resetClick()}
+                    move = {current.move}
+                  />
+              </div>
+              <div className='flex gap-1 outline outline-1 outline-offset-1 outline-black rounded'>
+                <button className='bg-blue-500 text-white align-middle disabled:bg-gray-400 px-2 text-lg rounded' disabled={this.state.stepNumber === 0? true : false} onClick={() => this.jumpTo(this.state.stepNumber-1)}>&#8592;</button>
+                <span className='flex-grow text-center'>{this.state.stepNumber === 0? 'Waiting': ('Move# ' + this.state.stepNumber)}</span>
+                <button className='bg-blue-500 text-white align-middle disabled:bg-gray-400 px-2 text-lg rounded' disabled={this.state.stepNumber === (this.state.history.length - 1) ? true : false} onClick={() => this.jumpTo(this.state.stepNumber+1)}>&#8594;</button>
+              </div>
+          </div>
         </div>
     );
   }
