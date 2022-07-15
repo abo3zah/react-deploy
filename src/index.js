@@ -120,14 +120,6 @@ class Game extends React.Component{
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
-    const moves = history.map((step, move) => {
-      const desc = move ? 'Go to move#' + move: 'Go to game start';
-      
-      return(
-        <li key={move} onClick={() => this.jumpTo(move)} className='border border-black bg-slate-200 p-2 rounded cursor-pointer'>{desc}</li>
-      );
-    })
-
     let status;
 
     if (winner){
@@ -138,10 +130,11 @@ class Game extends React.Component{
       }else{
         status = 'Next Player: ' + (this.state.xIsNext? 'X' : 'O');
       }
-  }
+    }
 
     return(
-        <div className='p-6 grid align-middle w-full'>
+        <div className='p-6 grid justify-center align-middle w-full gap-3'>
+            <div className='text-center text-3xl w-full'>{status}</div>
             <div className=''>
                 <Board 
                   squares = {current.squares}
@@ -150,9 +143,10 @@ class Game extends React.Component{
                   resetCmd = {() => this.resetClick()}
                 />
             </div>
-            <div className='pt-6 grid justify-center content-start w-full gap-2'>
-              <div className='text-center text-3xl w-full'>{status}</div>
-              <ol className='grid justify-items-stretch w-full gap-1'>{moves}</ol>
+            <div className='flex gap-1 outline outline-1 outline-black rounded'>
+              <button className='bg-blue-500 text-white align-middle disabled:bg-gray-400 px-2 text-lg rounded' disabled={this.state.stepNumber === 0? true : false} onClick={() => this.jumpTo(this.state.stepNumber-1)}>&#8592;</button>
+              <span className='flex-grow text-center'>{this.state.stepNumber === 0? 'Waiting': this.state.stepNumber}</span>
+              <button className='bg-blue-500 text-white align-middle disabled:bg-gray-400 px-2 text-lg rounded' disabled={this.state.stepNumber === (this.state.history.length - 1) ? true : false} onClick={() => this.jumpTo(this.state.stepNumber+1)}>&#8594;</button>
             </div>
         </div>
     );
